@@ -17,7 +17,7 @@ int main(void) {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow *window = glfwCreateWindow(SCREEN_W, SCREEN_H, "Window", NULL, NULL);
+    GLFWwindow *window = glfwCreateWindow(SCREEN_W, SCREEN_H, "1. Window", NULL, NULL);
     if (window == NULL) {
         printf("Unable to open glfw window\n");
         glfwTerminate();
@@ -43,6 +43,7 @@ int main(void) {
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
+
     glfwTerminate();
     return 0;
 }

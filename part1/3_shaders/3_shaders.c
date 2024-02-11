@@ -4,34 +4,37 @@
 #include <cglm/cglm.h>
 #include <cglm/types-struct.h>
 
+#define GLSL_LOADER_IMPL
+#include "glsl_loader.h"
+
+// #version version_number
+// in type name;
+// out type name;
+// uniform type name;
+//   
+// void main() {
+//   // process input(s) and do some weird graphics stuff
+//   ...
+//   // output processed stuff to output variable
+//   out_name = weird_stuff_we_processed;
+// }
+
 #define array_size(a) (sizeof(a) / sizeof(*a))
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 
 #define SCREEN_W 800
 #define SCREEN_H 600
-
-const char *vertex_shader_source = "#version 330 core\n"
-    "layout (location = 0) in vec3 aPos;\n"
-    "void main()\n"
-    "{\n"
-    "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-    "}\0";
-
-const char *fragment_shader_source = "#version 330 core\n"
-    "out vec4 FragColor;\n"
-    "void main()\n"
-    "{\n"
-    "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
-    "}\n\0";
+#define PI 3.141592f
 
 float vertices[] = {
-    -0.5f, -0.5f, 0.0f, // 0 bottom left
-    +0.5f, -0.5f, 0.0f, // 1 bottom right
-    +0.5f, +0.5f, 0.0f, // 2 top right
-    -0.5f, +0.5f, 0.0f, // 3 top left
+    // positions          // colors
+    -0.5f, -0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   // 0 bottom left
+    +0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   // 1 bottom right
+    +0.5f, +0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   // 2 top right
+    -0.5f, +0.5f, 0.0f,   1.0f, 0.0f, 1.0f,   // 3 top left
 };
 
-unsigned int indices[] = {
+GLuint indices[] = {
     2, 1, 3, // top right triangle
     1, 0, 3, // bottom left triangle
 };
@@ -42,7 +45,7 @@ int main(void) {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow *window = glfwCreateWindow(SCREEN_W, SCREEN_H, "2.1 Rectangle", NULL, NULL);
+    GLFWwindow *window = glfwCreateWindow(SCREEN_W, SCREEN_H, "3. Shaders", NULL, NULL);
     if (window == NULL) {
         printf("Unable to open glfw window\n");
         glfwTerminate();
@@ -57,74 +60,40 @@ int main(void) {
     glViewport(0, 0, SCREEN_W, SCREEN_H);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
-    unsigned int vertex_shader;
-    vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertex_shader, 1, &vertex_shader_source, NULL);
-    glCompileShader(vertex_shader);
+    int max_n_attributes;
+    glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &max_n_attributes);
+    printf("Max number of vertex attributes in OpenGL: %i\n", max_n_attributes);
 
-    int vertex_success;
-    char vertex_log[512];
-    glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &vertex_success);
-    if (!vertex_success) {
-        glGetShaderInfoLog(vertex_shader, 512, NULL, vertex_log);
-        printf("vertex shader compilation error:\n%s\n", vertex_log);
-        return -1;
-    }
+    GLuint shader_program = glsl_load("part1/3_shaders/shader.vert", "part1/3_shaders/shader.frag");
 
-    unsigned int fragment_shader;
-    fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragment_shader, 1, &fragment_shader_source, NULL);
-    glCompileShader(fragment_shader);
-
-    int fragment_success;
-    char fragment_log[512];
-    glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &fragment_success);
-    if (!fragment_success) {
-        glGetShaderInfoLog(fragment_shader, 512, NULL, fragment_log);
-        printf("fragment shader compilation error:\n%s\n", fragment_log);
-        return -1;
-    }
-
-    int shader_program;
-    shader_program = glCreateProgram();
-    glAttachShader(shader_program, vertex_shader);
-    glAttachShader(shader_program, fragment_shader);
-    glLinkProgram(shader_program);
-
-    int program_success;
-    char program_log[512];
-    glGetProgramiv(shader_program, GL_LINK_STATUS, &program_success);
-    if (!program_success) {
-        glGetProgramInfoLog(shader_program, 512, NULL, program_log);
-        printf("shader program linking error:\n%s\n", program_log);
-        return -1;
-    }
-    glDeleteShader(vertex_shader);
-    glDeleteShader(fragment_shader);
-
-    unsigned int EBO;
+    GLuint EBO;
     glGenBuffers(1, &EBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
     
-    unsigned int VAO;
+    GLuint VAO;
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
 
-    unsigned int VBO;
+    GLuint VBO;
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
     const int aPos = glGetAttribLocation(shader_program, "aPos");
-    glVertexAttribPointer(aPos, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glVertexAttribPointer(aPos, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(aPos);
+    const int aColor = glGetAttribLocation(shader_program, "aColor");
+    glVertexAttribPointer(aColor, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(aColor);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
     while (!glfwWindowShouldClose(window)) {
+        float time = glfwGetTime();
+
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
             glfwSetWindowShouldClose(window, true);
         }
@@ -139,10 +108,13 @@ int main(void) {
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
+        float t = (sinf(PI*time) * 0.25f) + 0.25f;
+
         glUseProgram(shader_program);
+        glUniform1f(glGetUniformLocation(shader_program, "t"), t);
         glBindVertexArray(VAO);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-        glDrawElements(GL_TRIANGLES, array_size(indices), GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, array_size(indices), GL_UNSIGNED_INT, (void*)0);
 
         glfwSwapBuffers(window);
         glfwPollEvents();

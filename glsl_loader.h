@@ -1,7 +1,26 @@
-#include "shader.h"
+#ifndef _GLSL_LOADER_H
+#define _GLSL_LOADER_H
 
-ShaderID shader_new(char *vs_path, char *fs_path) {
-    ShaderID shader = 0;
+#include <stdio.h>
+#include <string.h>
+#include <assert.h>
+
+#include <glad/glad.h>
+#include <cglm/cglm.h>
+#include <cglm/types-struct.h>
+
+#define SHADER_LOG_SIZE 1024
+
+GLuint glsl_load(char *vs_path, char *fs_path);
+void glsl_loader_check_compile_errors(GLuint shader, char *type);
+void glsl_loader_check_linking_errors(GLuint shader);
+
+
+#ifdef GLSL_LOADER_IMPL
+
+
+GLuint glsl_load(char *vs_path, char *fs_path) {
+    GLuint shader;
     
     FILE *vs_file = fopen(vs_path, "r");
     assert(vs_file != NULL);
@@ -21,15 +40,14 @@ ShaderID shader_new(char *vs_path, char *fs_path) {
     fread(vs_contents, sizeof(char), vs_file_size, vs_file);
     fread(fs_contents, sizeof(char), fs_file_size, fs_file);
 
-    for (int i = vs_file_size - 15; i < vs_file_size; i++) {
+    for (int i = vs_file_size - 20; i < vs_file_size; i++) {
         char c = vs_contents[i];
         if (c < 0 || c >= 128) {
             vs_contents[i] = '\0';
             break;
         }
-        
     }
-    for (int i = fs_file_size - 15; i < fs_file_size; i++) {
+    for (int i = fs_file_size - 20; i < fs_file_size; i++) {
         char c = fs_contents[i];
         if (c < 0 || c >= 128) {
             fs_contents[i] = '\0';
@@ -37,23 +55,23 @@ ShaderID shader_new(char *vs_path, char *fs_path) {
         }
     }
 
-    unsigned int vertex, fragment;
+    GLuint vertex, fragment;
 
     vertex = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertex, 1, &vs_contents, NULL);
     glCompileShader(vertex);
-    shader_check_compile_errors(vertex, "Vertex");
+    glsl_loader_check_compile_errors(vertex, "Vertex");
 
     fragment = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragment, 1, &fs_contents, NULL);
     glCompileShader(fragment);
-    shader_check_compile_errors(fragment, "Fragment");
+    glsl_loader_check_compile_errors(fragment, "Fragment");
 
     shader = glCreateProgram();
     glAttachShader(shader, vertex);
     glAttachShader(shader, fragment);
     glLinkProgram(shader);
-    shader_check_linking_errors(shader);
+    glsl_loader_check_linking_errors(shader);
 
     glDeleteShader(vertex);
     glDeleteShader(fragment);
@@ -64,7 +82,8 @@ ShaderID shader_new(char *vs_path, char *fs_path) {
     return shader;
 }
 
-void shader_check_compile_errors(GLuint shader, char *type) {
+
+void glsl_loader_check_compile_errors(GLuint shader, char *type) {
     GLint success;
     GLchar info_log[SHADER_LOG_SIZE];
 
@@ -75,7 +94,8 @@ void shader_check_compile_errors(GLuint shader, char *type) {
     }
 }
 
-void shader_check_linking_errors(GLuint shader) {
+
+void glsl_loader_check_linking_errors(GLuint shader) {
     GLint success;
     GLchar info_log[SHADER_LOG_SIZE];
 
@@ -85,3 +105,9 @@ void shader_check_linking_errors(GLuint shader) {
         printf("Shader program failed to link:\n%s\n", info_log);
     }
 }
+
+
+#endif // ifdef SHADER_IMPLEMENTATION
+
+
+#endif // _GLSL_LOADER_H

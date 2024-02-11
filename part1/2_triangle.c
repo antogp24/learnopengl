@@ -4,8 +4,6 @@
 #include <cglm/cglm.h>
 #include <cglm/types-struct.h>
 
-vec2s normalized_to_screen(float nx, float yn);
-vec2s screen_to_normalized(float x, float y);
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 
 #define SCREEN_W 800
@@ -37,7 +35,7 @@ int main(void) {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow *window = glfwCreateWindow(SCREEN_W, SCREEN_H, "Triangle", NULL, NULL);
+    GLFWwindow *window = glfwCreateWindow(SCREEN_W, SCREEN_H, "2. Triangle", NULL, NULL);
     if (window == NULL) {
         printf("Unable to open glfw window\n");
         glfwTerminate();
@@ -128,6 +126,10 @@ int main(void) {
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
+
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &VBO);
+
     glfwTerminate();
     return 0;
 }
