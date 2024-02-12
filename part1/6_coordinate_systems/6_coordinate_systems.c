@@ -1,3 +1,5 @@
+// https://learnopengl.com/Getting-started/Coordinate-Systems
+
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -23,15 +25,18 @@ typedef struct {
 Image load_image(char *path);
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 
-#define SCREEN_W 800
-#define SCREEN_H 600
+#define _SCREEN_W 800
+#define _SCREEN_H 600
+
+int screen_w = _SCREEN_W;
+int screen_h = _SCREEN_H;
 
 float vertices[] = {
-    // positions         // texcoords
-    -0.5f, +0.5f, 0.0f,  0.0f, 1.0f,  // 0 top left 
-    +0.5f, +0.5f, 0.0f,  1.0f, 1.0f,  // 1 top right 
-    -0.5f, -0.5f, 0.0f,  0.0f, 0.0f,  // 2 bottom left
-    +0.5f, -0.5f, 0.0f,  1.0f, 0.0f,  // 3 bottom right
+    // positions    // texcoords
+    -0.5f, +0.5f,   0.0f, 1.0f,  // 0 top left 
+    +0.5f, +0.5f,   1.0f, 1.0f,  // 1 top right 
+    -0.5f, -0.5f,   0.0f, 0.0f,  // 2 bottom left
+    +0.5f, -0.5f,   1.0f, 0.0f,  // 3 bottom right
 };
 
 GLuint indices[] = {
@@ -39,66 +44,29 @@ GLuint indices[] = {
     3, 2, 0, // bottom left triangle
 };
 
-
-// **Common Transformation Matrices**
+// **Coordinate Systems**
+// -----------------------------
+//
+// 1. Local Space (Object Space)
+// 2. World Space
+// 3. View Space (Eye Space)
+// 4. Clip Space
+// 5. Screen Space
+//
+// **Matrices used for conversion**
+// -----------------------------
+//
+//    1. --(model matrix)--> 2. --(view matrix)--> 3. --(projection matrix)--> 4. --(automatically)--> 5.
 // 
-//    At: transformation matrix
-//     v: input vector
-//  T(v): output vector
+// **Brief Explanation**
+// -----------------------------
 //
-//          At            v    =    T(v)  
+// 1. Local coordinates are the coordinates of your object relative to its local origin; they're the coordinates your object begins in.
+// 2. World-space coordinates are relative to some global origin of the world, together with many other objects also placed relative to this world's origin.
+// 3. View-space coordinates are seen from the camera or viewer's point of view.
+// 4. Clip coordinates determine the type of projection, are processed to the -1.0 and 1.0 range, and determine which vertices will end up on the screen.
+// 5. Screen coordinates transforms the coordinates from -1.0 and 1.0 to the coordinate range defined by glViewport.
 //
-//  [ a00 a01 a02 a03 ] [ x ]     [ T(x) ]
-//  [ a10 a11 a12 a13 ] [ y ]  =  [ T(y) ]
-//  [ a20 a21 a22 a23 ] [ z ]  =  [ T(z) ]
-//  [ a30 a31 a32 a33 ] [ 1 ]     [ T(1) ]
-//          4x4          4x1         4x1
-//
-// * Translation
-//  
-//  (a, b, c): translation vector
-//  
-//  [ 1 0 0 a ] [ x ]     [ x + a ]
-//  [ 0 1 0 b ] [ y ]  =  [ y + b ]
-//  [ 0 0 1 c ] [ z ]  =  [ z + c ]
-//  [ 0 0 0 1 ] [ 1 ]     [   1   ]
-//  
-// * Scaling
-//  
-//  s: scale factor
-//  
-//  [ s 0 0 0 ] [ x ]     [ s * x ]
-//  [ 0 s 0 0 ] [ y ]  =  [ s * y ]
-//  [ 0 0 s 0 ] [ z ]  =  [ s * z ]
-//  [ 0 0 0 1 ] [ 1 ]     [   1   ]
-//  
-// * Rotating around Z axis
-//  
-//  t: angle //  c: cos(t) //  s: sin(t)
-//  
-//  [ c -s  0  0 ] [ x ]     [ c*x - s*y ]
-//  [ s  c  0  0 ] [ y ]  =  [ s*x + c*y ]
-//  [ 0  0  1  0 ] [ z ]  =  [     z     ]
-//  [ 0  0  0  1 ] [ 1 ]     [     1     ]
-//  
-// * Rotating around X axis
-//  
-//  t: angle //  c: cos(t) //  s: sin(t)
-//  
-//  [ 1  0  0  0 ] [ x ]     [     x     ]
-//  [ 0  c -s  0 ] [ y ]  =  [ c*y - s*z ]
-//  [ 0  s  c  0 ] [ z ]  =  [ s*y + c*z ]
-//  [ 0  0  0  1 ] [ 1 ]     [     1     ]
-//  
-// * Rotating around Y axis
-//  
-//  t: angle //  c: cos(t) //  s: sin(t)
-//  
-//  [  c  0  s  0 ] [ x ]     [ c*x + s*z ]
-//  [  0  1  0  0 ] [ y ]  =  [     y     ]
-//  [ -s  0  c  0 ] [ z ]  =  [ c*z - s*x ]
-//  [  0  0  0  1 ] [ 1 ]     [     1     ]
-//  
 
 int main(void) {
     glfwInit();
@@ -106,7 +74,7 @@ int main(void) {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow *window = glfwCreateWindow(SCREEN_W, SCREEN_H, "5. Transformations", NULL, NULL);
+    GLFWwindow *window = glfwCreateWindow(screen_w, screen_h, "6. Coordinate Systems", NULL, NULL);
     if (window == NULL) {
         printf("Unable to open glfw window\n");
         glfwTerminate();
@@ -118,10 +86,12 @@ int main(void) {
         printf("Unable to initialize glad\n");
         return -1;
     }
-    glViewport(0, 0, SCREEN_W, SCREEN_H);
+    glViewport(0, 0, screen_w, screen_h);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
-    GLuint shader_program = glsl_load("part1/5_transformations/shader.vert", "part1/5_transformations/shader.frag");
+    glEnable(GL_DEPTH_TEST);
+
+    GLuint shader_program = glsl_load("part1/6_coordinate_systems/shader.vert", "part1/6_coordinate_systems/shader.frag");
 
     GLuint VBO, VAO, EBO;
     glGenVertexArrays(1, &VAO);
@@ -137,11 +107,11 @@ int main(void) {
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     const int in_pos = glGetAttribLocation(shader_program, "in_pos");
-    glVertexAttribPointer(in_pos, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glVertexAttribPointer(in_pos, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(in_pos);
 
     const int in_tex_coord = glGetAttribLocation(shader_program, "in_tex_coord");
-    glVertexAttribPointer(in_tex_coord, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glVertexAttribPointer(in_tex_coord, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
     glEnableVertexAttribArray(in_tex_coord);
 
     stbi_set_flip_vertically_on_load(true);
@@ -185,8 +155,8 @@ int main(void) {
     }
 
     glUseProgram(shader_program);
-    glUniform1i(glGetUniformLocation(shader_program, "tex0"), 0);
-    glUniform1i(glGetUniformLocation(shader_program, "tex1"), 1);
+    glUniform1i(glGetUniformLocation(shader_program, "texture0"), 0);
+    glUniform1i(glGetUniformLocation(shader_program, "texture1"), 1);
 
     while (!glfwWindowShouldClose(window)) {
 
@@ -197,37 +167,58 @@ int main(void) {
         }
 
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture0);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, texture1);
 
-        // First smiley
+        glfwGetWindowSize(window, &screen_w, &screen_h);
+        float aspect_ratio = (float)screen_w / (float)screen_h;
+
+        mat4 model = GLM_MAT4_IDENTITY_INIT;
+        mat4 view = GLM_MAT4_IDENTITY_INIT;
+        mat4 projection = GLM_MAT4_IDENTITY_INIT;
+        {
+            glm_rotate(model, -PI*0.35f, (vec3s){1.0f, 0.0f, 0.0f}.raw);
+            glm_translate(view, (vec3s){0.0f, 0.0f, -1.0f}.raw);
+
+            const float near = 0.1f, far = 100.0f, fov = PI/4;
+            /* glm_ortho(0.0f, screen_w, 0.0f, screen_h, near, far, projection); */
+            glm_perspective(fov, aspect_ratio, near, far, projection);
+
+            const bool transpose = GL_FALSE;
+            glUniformMatrix4fv(glGetUniformLocation(shader_program, "model"), 1, transpose, (float*)model);
+            glUniformMatrix4fv(glGetUniformLocation(shader_program, "view"), 1, transpose, (float*)view);
+            glUniformMatrix4fv(glGetUniformLocation(shader_program, "projection"), 1, transpose, (float*)projection);
+        }
+
+        // first smiley
         {
             mat4 transform = GLM_MAT4_IDENTITY_INIT;
-            glm_translate(transform, (vec3s){0.5f, -0.5f, 0.0f}.raw);
+            glm_translate(transform, (vec3s){0.0f, 0.0f, -0.25f}.raw);
             glm_rotate(transform, time, (vec3s){0.0f, 0.0f, 1.0f}.raw);
             float s = (sinf(time*PI) * 0.25f) + 0.5f;
             glm_scale(transform, (vec3s){s, s, s}.raw);
-            glUniformMatrix4fv(glGetUniformLocation(shader_program, "transform"), 1, GL_TRUE, (float*)transform);
+            glUniformMatrix4fv(glGetUniformLocation(shader_program, "transform"), 1, GL_FALSE, (float*)transform);
 
             glUseProgram(shader_program);
             glBindVertexArray(VAO);
             glDrawElements(GL_TRIANGLES, array_size(indices), GL_UNSIGNED_INT, 0);
-            
         }
-
-        // Second smiley
+            
+        // second smiley
         {
             mat4 transform = GLM_MAT4_IDENTITY_INIT;
-            glm_translate(transform, (vec3s){-0.5f, 0.5f, 0.0f}.raw);
-            glm_rotate(transform, -time, (vec3s){0.0f, 0.0f, 1.0f}.raw);
+            glm_translate(transform, (vec3s){0.0f, 0.0f, 0.25f}.raw);
+            glm_rotate(transform, time, (vec3s){0.0f, 0.0f, 1.0f}.raw);
             float s = (sinf(-time*PI) * 0.25f) + 0.5f;
             glm_scale(transform, (vec3s){s, s, s}.raw);
-            glUniformMatrix4fv(glGetUniformLocation(shader_program, "transform"), 1, GL_TRUE, (float*)transform);
+            glUniformMatrix4fv(glGetUniformLocation(shader_program, "transform"), 1, GL_FALSE, (float*)transform);
 
+            glUseProgram(shader_program);
+            glBindVertexArray(VAO);
             glDrawElements(GL_TRIANGLES, array_size(indices), GL_UNSIGNED_INT, 0);
         }
 
