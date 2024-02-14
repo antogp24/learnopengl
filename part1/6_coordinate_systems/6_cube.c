@@ -30,16 +30,48 @@ int screen_w = _SCREEN_W;
 int screen_h = _SCREEN_H;
 
 float vertices[] = {
-    // positions    // texcoords
-    -0.5f, +0.5f,   0.0f, 1.0f,  // 0 top left 
-    +0.5f, +0.5f,   1.0f, 1.0f,  // 1 top right 
-    -0.5f, -0.5f,   0.0f, 0.0f,  // 2 bottom left
-    +0.5f, -0.5f,   1.0f, 0.0f,  // 3 bottom right
-};
+//        positions         texcoords
+    -0.5f, -0.5f, -0.5f,   0.0f, 0.0f,
+     0.5f, -0.5f, -0.5f,   1.0f, 0.0f,
+     0.5f,  0.5f, -0.5f,   1.0f, 1.0f,
+     0.5f,  0.5f, -0.5f,   1.0f, 1.0f,
+    -0.5f,  0.5f, -0.5f,   0.0f, 1.0f,
+    -0.5f, -0.5f, -0.5f,   0.0f, 0.0f,
 
-GLuint indices[] = {
-    1, 3, 0, // top right triangle
-    3, 2, 0, // bottom left triangle
+    -0.5f, -0.5f,  0.5f,   0.0f, 0.0f,
+     0.5f, -0.5f,  0.5f,   1.0f, 0.0f,
+     0.5f,  0.5f,  0.5f,   1.0f, 1.0f,
+     0.5f,  0.5f,  0.5f,   1.0f, 1.0f,
+    -0.5f,  0.5f,  0.5f,   0.0f, 1.0f,
+    -0.5f, -0.5f,  0.5f,   0.0f, 0.0f,
+
+    -0.5f,  0.5f,  0.5f,   1.0f, 0.0f,
+    -0.5f,  0.5f, -0.5f,   1.0f, 1.0f,
+    -0.5f, -0.5f, -0.5f,   0.0f, 1.0f,
+    -0.5f, -0.5f, -0.5f,   0.0f, 1.0f,
+    -0.5f, -0.5f,  0.5f,   0.0f, 0.0f,
+    -0.5f,  0.5f,  0.5f,   1.0f, 0.0f,
+
+     0.5f,  0.5f,  0.5f,   1.0f, 0.0f,
+     0.5f,  0.5f, -0.5f,   1.0f, 1.0f,
+     0.5f, -0.5f, -0.5f,   0.0f, 1.0f,
+     0.5f, -0.5f, -0.5f,   0.0f, 1.0f,
+     0.5f, -0.5f,  0.5f,   0.0f, 0.0f,
+     0.5f,  0.5f,  0.5f,   1.0f, 0.0f,
+
+    -0.5f, -0.5f, -0.5f,   0.0f, 1.0f,
+     0.5f, -0.5f, -0.5f,   1.0f, 1.0f,
+     0.5f, -0.5f,  0.5f,   1.0f, 0.0f,
+     0.5f, -0.5f,  0.5f,   1.0f, 0.0f,
+    -0.5f, -0.5f,  0.5f,   0.0f, 0.0f,
+    -0.5f, -0.5f, -0.5f,   0.0f, 1.0f,
+
+    -0.5f,  0.5f, -0.5f,   0.0f, 1.0f,
+     0.5f,  0.5f, -0.5f,   1.0f, 1.0f,
+     0.5f,  0.5f,  0.5f,   1.0f, 0.0f,
+     0.5f,  0.5f,  0.5f,   1.0f, 0.0f,
+    -0.5f,  0.5f,  0.5f,   0.0f, 0.0f,
+    -0.5f,  0.5f, -0.5f,   0.0f, 1.0f,
 };
 
 // **Coordinate Systems**
@@ -72,7 +104,7 @@ int main(void) {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow *window = glfwCreateWindow(screen_w, screen_h, "6. Coordinate Systems", NULL, NULL);
+    GLFWwindow *window = glfwCreateWindow(screen_w, screen_h, "6.1 Cube", NULL, NULL);
     if (window == NULL) {
         printf("Unable to open glfw window\n");
         glfwTerminate();
@@ -89,27 +121,23 @@ int main(void) {
 
     glEnable(GL_DEPTH_TEST);
 
-    GLuint shader_program = glsl_load("part1/6_coordinate_systems/shader.vert", "part1/6_coordinate_systems/shader.frag");
+    GLuint shader_program = glsl_load("part1/6_coordinate_systems/cube_shader.vert", "part1/6_coordinate_systems/cube_shader.frag");
 
-    GLuint VBO, VAO, EBO;
+    GLuint VBO, VAO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
 
     glBindVertexArray(VAO);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
     const int in_pos = glGetAttribLocation(shader_program, "in_pos");
-    glVertexAttribPointer(in_pos, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+    glVertexAttribPointer(in_pos, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(in_pos);
 
     const int in_tex_coord = glGetAttribLocation(shader_program, "in_tex_coord");
-    glVertexAttribPointer(in_tex_coord, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+    glVertexAttribPointer(in_tex_coord, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(in_tex_coord);
 
     stbi_set_flip_vertically_on_load(true);
@@ -124,7 +152,7 @@ int main(void) {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-        Image container = load_image("part1/5_transformations/container.jpg");
+        Image container = load_image("part1/6_coordinate_systems/container.jpg");
         if (container.img) {
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, container.width, container.height, 0, GL_RGB, GL_UNSIGNED_BYTE, container.img);
             glGenerateMipmap(GL_TEXTURE_2D);
@@ -143,7 +171,7 @@ int main(void) {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-        Image face = load_image("part1/5_transformations/awesomeface.jpg");
+        Image face = load_image("part1/6_coordinate_systems/awesomeface.jpg");
         if (face.img) {
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, face.width, face.height, 0, GL_RGB, GL_UNSIGNED_BYTE, face.img);
             glGenerateMipmap(GL_TEXTURE_2D);
@@ -178,9 +206,10 @@ int main(void) {
         mat4 model = GLM_MAT4_IDENTITY_INIT;
         mat4 view = GLM_MAT4_IDENTITY_INIT;
         mat4 projection = GLM_MAT4_IDENTITY_INIT;
-        {
-            glm_rotate(model, -PI*0.35f, (vec3s){1.0f, 0.0f, 0.0f}.raw);
-            glm_translate(view, (vec3s){0.0f, 0.0f, -2.0f}.raw);
+
+        for (int i = 0; i < 1; i++) {
+            glm_rotate(model, time, (vec3s){0.5f, 1.0f, 0.0f}.raw);
+            glm_translate(view, (vec3s){0.0f, 0.0f, -3.0f}.raw);
 
             const float near = 0.1f, far = 100.0f, fov = PI/4;
             /* glm_ortho(0.0f, screen_w, 0.0f, screen_h, near, far, projection); */
@@ -190,34 +219,9 @@ int main(void) {
             glUniformMatrix4fv(glGetUniformLocation(shader_program, "model"), 1, transpose, (float*)model);
             glUniformMatrix4fv(glGetUniformLocation(shader_program, "view"), 1, transpose, (float*)view);
             glUniformMatrix4fv(glGetUniformLocation(shader_program, "projection"), 1, transpose, (float*)projection);
-        }
-
-        // first smiley
-        {
-            mat4 transform = GLM_MAT4_IDENTITY_INIT;
-            glm_translate(transform, (vec3s){0.0f, 0.0f, -0.25f}.raw);
-            glm_rotate(transform, time, (vec3s){0.0f, 0.0f, 1.0f}.raw);
-            float s = (sinf(time*PI) * 0.25f) + 0.5f;
-            glm_scale(transform, (vec3s){s, s, s}.raw);
-            glUniformMatrix4fv(glGetUniformLocation(shader_program, "transform"), 1, GL_FALSE, (float*)transform);
-
             glUseProgram(shader_program);
             glBindVertexArray(VAO);
-            glDrawElements(GL_TRIANGLES, array_size(indices), GL_UNSIGNED_INT, 0);
-        }
-            
-        // second smiley
-        {
-            mat4 transform = GLM_MAT4_IDENTITY_INIT;
-            glm_translate(transform, (vec3s){0.0f, 0.0f, 0.25f}.raw);
-            glm_rotate(transform, time, (vec3s){0.0f, 0.0f, 1.0f}.raw);
-            float s = (sinf(-time*PI) * 0.25f) + 0.5f;
-            glm_scale(transform, (vec3s){s, s, s}.raw);
-            glUniformMatrix4fv(glGetUniformLocation(shader_program, "transform"), 1, GL_FALSE, (float*)transform);
-
-            glUseProgram(shader_program);
-            glBindVertexArray(VAO);
-            glDrawElements(GL_TRIANGLES, array_size(indices), GL_UNSIGNED_INT, 0);
+            glDrawArrays(GL_TRIANGLES, 0, 36);
         }
 
         glfwSwapBuffers(window);
@@ -226,7 +230,6 @@ int main(void) {
 
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
-    glDeleteBuffers(1, &EBO);
 
     glfwTerminate();
     return 0;

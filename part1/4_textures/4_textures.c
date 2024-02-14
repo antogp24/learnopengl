@@ -26,11 +26,11 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 #define SCREEN_H 600
 
 float vertices[] = {
-    // positions         // colors          // texcoords
-    -0.5f, +0.5f, 0.0f,  1.0f, 0.0f, 0.0f,  0.0f, 2.0f,  // 0 top left 
-    +0.5f, +0.5f, 0.0f,  0.0f, 1.0f, 0.0f,  2.0f, 2.0f,  // 1 top right 
-    -0.5f, -0.5f, 0.0f,  0.0f, 0.0f, 1.0f,  0.0f, 0.0f,  // 2 bottom left
-    +0.5f, -0.5f, 0.0f,  1.0f, 1.0f, 0.0f,  2.0f, 0.0f,  // 3 bottom right
+    // positions       // colors      // texcoords
+    -0.5f, +0.5f,   1.0f, 0.0f, 0.0f,  0.0f, 2.0f,  // 0 top left 
+    +0.5f, +0.5f,   0.0f, 1.0f, 0.0f,  2.0f, 2.0f,  // 1 top right 
+    -0.5f, -0.5f,   0.0f, 0.0f, 1.0f,  0.0f, 0.0f,  // 2 bottom left
+    +0.5f, -0.5f,   1.0f, 1.0f, 0.0f,  2.0f, 0.0f,  // 3 bottom right
 };
 
 GLuint indices[] = {
@@ -75,15 +75,15 @@ int main(void) {
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     const int in_pos = glGetAttribLocation(shader_program, "in_pos");
-    glVertexAttribPointer(in_pos, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    glVertexAttribPointer(in_pos, 2, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(in_pos);
 
     const int in_color = glGetAttribLocation(shader_program, "in_color");
-    glVertexAttribPointer(in_color, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    glVertexAttribPointer(in_color, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(2 * sizeof(float)));
     glEnableVertexAttribArray(in_color);
     
     const int in_tex_coord = glGetAttribLocation(shader_program, "in_tex_coord");
-    glVertexAttribPointer(in_tex_coord, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    glVertexAttribPointer(in_tex_coord, 2, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(5 * sizeof(float)));
     glEnableVertexAttribArray(in_tex_coord);
 
     stbi_set_flip_vertically_on_load(true);

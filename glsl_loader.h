@@ -9,7 +9,7 @@
 #include <cglm/cglm.h>
 #include <cglm/types-struct.h>
 
-#define SHADER_LOG_SIZE 1024
+#define GLSL_LOADER_LOG_SIZE 1024
 
 GLuint glsl_load(char *vs_path, char *fs_path);
 void glsl_loader_check_compile_errors(GLuint shader, char *type);
@@ -25,35 +25,40 @@ GLuint glsl_load(char *vs_path, char *fs_path) {
     FILE *vs_file = fopen(vs_path, "r");
     assert(vs_file != NULL);
     fseek(vs_file, 0, SEEK_END);
-    int vs_file_size = ftell(vs_file);
+    long vs_file_size = ftell(vs_file);
     fseek(vs_file, 0, SEEK_SET);
 
     FILE *fs_file = fopen(fs_path, "r");
     assert(fs_file != NULL);
     fseek(fs_file, 0, SEEK_END);
-    int fs_file_size = ftell(fs_file);
+    long fs_file_size = ftell(fs_file);
     fseek(fs_file, 0, SEEK_SET);
 
-    char *vs_contents = malloc(vs_file_size * sizeof(char));
-    char *fs_contents = malloc(fs_file_size * sizeof(char));
+    char *vs_contents = malloc((vs_file_size + 1) * sizeof(char));
+    char *fs_contents = malloc((fs_file_size + 1) * sizeof(char));
 
-    fread(vs_contents, sizeof(char), vs_file_size, vs_file);
-    fread(fs_contents, sizeof(char), fs_file_size, fs_file);
-
-    for (int i = vs_file_size - 20; i < vs_file_size; i++) {
-        char c = vs_contents[i];
+    for (int c = 0, i = 0; ; i++) {
+        c = fgetc(vs_file);
+        vs_contents[i] = c;
         if (c < 0 || c >= 128) {
             vs_contents[i] = '\0';
+            vs_file_size = i;
             break;
         }
     }
-    for (int i = fs_file_size - 20; i < fs_file_size; i++) {
-        char c = fs_contents[i];
+
+    for (int c = 0, i = 0; ; i++) {
+        c = fgetc(fs_file);
+        fs_contents[i] = c;
         if (c < 0 || c >= 128) {
             fs_contents[i] = '\0';
+            fs_file_size = i;
             break;
         }
     }
+
+    fclose(vs_file);
+    fclose(fs_file);
 
     GLuint vertex, fragment;
 
@@ -76,20 +81,17 @@ GLuint glsl_load(char *vs_path, char *fs_path) {
     glDeleteShader(vertex);
     glDeleteShader(fragment);
 
-    fclose(vs_file);
-    fclose(fs_file);
-
     return shader;
 }
 
 
 void glsl_loader_check_compile_errors(GLuint shader, char *type) {
     GLint success;
-    GLchar info_log[SHADER_LOG_SIZE];
+    GLchar info_log[GLSL_LOADER_LOG_SIZE];
 
     glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
     if (!success) {
-        glGetShaderInfoLog(shader, SHADER_LOG_SIZE, NULL, info_log);
+        glGetShaderInfoLog(shader, GLSL_LOADER_LOG_SIZE, NULL, info_log);
         printf("%s shader failed to compile:\n%s\n", type, info_log);
     }
 }
@@ -97,17 +99,17 @@ void glsl_loader_check_compile_errors(GLuint shader, char *type) {
 
 void glsl_loader_check_linking_errors(GLuint shader) {
     GLint success;
-    GLchar info_log[SHADER_LOG_SIZE];
+    GLchar info_log[GLSL_LOADER_LOG_SIZE];
 
     glGetProgramiv(shader, GL_LINK_STATUS, &success);
     if (!success) {
-        glGetProgramInfoLog(shader, SHADER_LOG_SIZE, NULL, info_log);
+        glGetProgramInfoLog(shader, GLSL_LOADER_LOG_SIZE, NULL, info_log);
         printf("Shader program failed to link:\n%s\n", info_log);
     }
 }
 
 
-#endif // ifdef SHADER_IMPLEMENTATION
+#endif // ifdef GLSL_LODADER_IMPL
 
 
 #endif // _GLSL_LOADER_H

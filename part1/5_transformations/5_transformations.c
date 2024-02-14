@@ -27,11 +27,11 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 #define SCREEN_H 600
 
 float vertices[] = {
-    // positions         // texcoords
-    -0.5f, +0.5f, 0.0f,  0.0f, 1.0f,  // 0 top left 
-    +0.5f, +0.5f, 0.0f,  1.0f, 1.0f,  // 1 top right 
-    -0.5f, -0.5f, 0.0f,  0.0f, 0.0f,  // 2 bottom left
-    +0.5f, -0.5f, 0.0f,  1.0f, 0.0f,  // 3 bottom right
+    // positions   // texcoords
+    -0.5f, +0.5f,   0.0f, 1.0f,  // 0 top left 
+    +0.5f, +0.5f,   1.0f, 1.0f,  // 1 top right 
+    -0.5f, -0.5f,   0.0f, 0.0f,  // 2 bottom left
+    +0.5f, -0.5f,   1.0f, 0.0f,  // 3 bottom right
 };
 
 GLuint indices[] = {
@@ -137,11 +137,11 @@ int main(void) {
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     const int in_pos = glGetAttribLocation(shader_program, "in_pos");
-    glVertexAttribPointer(in_pos, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glVertexAttribPointer(in_pos, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(in_pos);
 
     const int in_tex_coord = glGetAttribLocation(shader_program, "in_tex_coord");
-    glVertexAttribPointer(in_tex_coord, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glVertexAttribPointer(in_tex_coord, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
     glEnableVertexAttribArray(in_tex_coord);
 
     stbi_set_flip_vertically_on_load(true);
@@ -211,7 +211,7 @@ int main(void) {
             glm_rotate(transform, time, (vec3s){0.0f, 0.0f, 1.0f}.raw);
             float s = (sinf(time*PI) * 0.25f) + 0.5f;
             glm_scale(transform, (vec3s){s, s, s}.raw);
-            glUniformMatrix4fv(glGetUniformLocation(shader_program, "transform"), 1, GL_TRUE, (float*)transform);
+            glUniformMatrix4fv(glGetUniformLocation(shader_program, "transform"), 1, GL_FALSE, (float*)transform);
 
             glUseProgram(shader_program);
             glBindVertexArray(VAO);
@@ -226,7 +226,7 @@ int main(void) {
             glm_rotate(transform, -time, (vec3s){0.0f, 0.0f, 1.0f}.raw);
             float s = (sinf(-time*PI) * 0.25f) + 0.5f;
             glm_scale(transform, (vec3s){s, s, s}.raw);
-            glUniformMatrix4fv(glGetUniformLocation(shader_program, "transform"), 1, GL_TRUE, (float*)transform);
+            glUniformMatrix4fv(glGetUniformLocation(shader_program, "transform"), 1, GL_FALSE, (float*)transform);
 
             glDrawElements(GL_TRIANGLES, array_size(indices), GL_UNSIGNED_INT, 0);
         }

@@ -8,6 +8,6 @@ uniform mat4 transform;
 out vec2 vert_tex_coord;
 
 void main() {
-   gl_Position = vec4(in_pos, 1.0) * transform;
+   gl_Position = transform * vec4(in_pos, 1.0);
    vert_tex_coord = in_tex_coord;
 }

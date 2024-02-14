@@ -27,11 +27,11 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 #define PI 3.141592f
 
 float vertices[] = {
-    // positions          // colors
-    -0.5f, -0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   // 0 bottom left
-    +0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   // 1 bottom right
-    +0.5f, +0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   // 2 top right
-    -0.5f, +0.5f, 0.0f,   1.0f, 0.0f, 1.0f,   // 3 top left
+    // positions      // colors
+    -0.5f, -0.5f,   1.0f, 0.0f, 0.0f,   // 0 bottom left
+    +0.5f, -0.5f,   0.0f, 1.0f, 0.0f,   // 1 bottom right
+    +0.5f, +0.5f,   0.0f, 0.0f, 1.0f,   // 2 top right
+    -0.5f, +0.5f,   1.0f, 0.0f, 1.0f,   // 3 top left
 };
 
 GLuint indices[] = {
@@ -81,10 +81,10 @@ int main(void) {
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
     const int aPos = glGetAttribLocation(shader_program, "aPos");
-    glVertexAttribPointer(aPos, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glVertexAttribPointer(aPos, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(aPos);
     const int aColor = glGetAttribLocation(shader_program, "aColor");
-    glVertexAttribPointer(aColor, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glVertexAttribPointer(aColor, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(2 * sizeof(float)));
     glEnableVertexAttribArray(aColor);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);

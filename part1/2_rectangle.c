@@ -11,10 +11,10 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 #define SCREEN_H 600
 
 const char *vertex_shader_source = "#version 330 core\n"
-    "layout (location = 0) in vec3 aPos;\n"
+    "in vec2 aPos;\n"
     "void main()\n"
     "{\n"
-    "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+    "   gl_Position = vec4(aPos.x, aPos.y, 0.0, 1.0);\n"
     "}\0";
 
 const char *fragment_shader_source = "#version 330 core\n"
@@ -25,10 +25,10 @@ const char *fragment_shader_source = "#version 330 core\n"
     "}\n\0";
 
 float vertices[] = {
-    -0.5f, -0.5f, 0.0f, // 0 bottom left
-    +0.5f, -0.5f, 0.0f, // 1 bottom right
-    +0.5f, +0.5f, 0.0f, // 2 top right
-    -0.5f, +0.5f, 0.0f, // 3 top left
+    -0.5f, -0.5f, // 0 bottom left
+    +0.5f, -0.5f, // 1 bottom right
+    +0.5f, +0.5f, // 2 top right
+    -0.5f, +0.5f, // 3 top left
 };
 
 unsigned int indices[] = {
@@ -117,7 +117,7 @@ int main(void) {
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
     const int aPos = glGetAttribLocation(shader_program, "aPos");
-    glVertexAttribPointer(aPos, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glVertexAttribPointer(aPos, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(aPos);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
