@@ -74,6 +74,19 @@ float vertices[] = {
     -0.5f,  0.5f, -0.5f,   0.0f, 1.0f,
 };
 
+vec3 cube_positions[] = {
+    { 0.0f,  0.0f,  0.0f },
+    { 2.0f,  5.0f, -15.0f},
+    {-1.5f, -2.2f, -2.5f },
+    {-3.8f, -2.0f, -12.3f},
+    { 2.4f, -0.4f, -3.5f },
+    {-1.7f,  3.0f, -7.5f },
+    { 1.3f, -2.0f, -2.5f },
+    { 1.5f,  2.0f, -2.5f },
+    { 1.5f,  0.2f, -1.5f },
+    {-1.3f,  1.0f, -1.5f },
+};
+
 // **Coordinate Systems**
 // -----------------------------
 //
@@ -203,24 +216,40 @@ int main(void) {
         glfwGetWindowSize(window, &screen_w, &screen_h);
         float aspect_ratio = (float)screen_w / (float)screen_h;
 
-        mat4 model = GLM_MAT4_IDENTITY_INIT;
         mat4 view = GLM_MAT4_IDENTITY_INIT;
         mat4 projection = GLM_MAT4_IDENTITY_INIT;
-
-        for (int i = 0; i < 1; i++) {
-            glm_rotate(model, time, (vec3s){0.5f, 1.0f, 0.0f}.raw);
+        {
             glm_translate(view, (vec3s){0.0f, 0.0f, -3.0f}.raw);
+            glm_rotate(view, time*0.25f, (vec3s){0.0f, 0.0f, 1.0f}.raw);
 
             const float near = 0.1f, far = 100.0f, fov = PI/4;
             /* glm_ortho(0.0f, screen_w, 0.0f, screen_h, near, far, projection); */
             glm_perspective(fov, aspect_ratio, near, far, projection);
 
-            const bool transpose = GL_FALSE;
-            glUniformMatrix4fv(glGetUniformLocation(shader_program, "model"), 1, transpose, (float*)model);
-            glUniformMatrix4fv(glGetUniformLocation(shader_program, "view"), 1, transpose, (float*)view);
-            glUniformMatrix4fv(glGetUniformLocation(shader_program, "projection"), 1, transpose, (float*)projection);
-            glUseProgram(shader_program);
-            glBindVertexArray(VAO);
+            glUniformMatrix4fv(glGetUniformLocation(shader_program, "view"), 1, GL_FALSE, (float*)view);
+            glUniformMatrix4fv(glGetUniformLocation(shader_program, "projection"), 1, GL_FALSE, (float*)projection);
+        }
+
+        glUseProgram(shader_program);
+        glBindVertexArray(VAO);
+
+        for (int i = 0; i < array_size(cube_positions); i++) {
+            mat4 model = GLM_MAT4_IDENTITY_INIT;
+            int sign = (i % 3 == 0) ? 1 : -1;
+
+            glm_translate(model, cube_positions[i]);
+
+            /* scale */ {
+                float s = sign * (cosf(time*PI) * 0.125f) + (1.0f - 0.125f);
+                glm_scale(model, (vec3s){s, s, s}.raw);
+            }
+
+            /* rotate */ {
+                float angle = sign * (time + i);
+                glm_rotate(model, angle, (vec3s){1.0f, 0.3f, 0.5f}.raw);
+            }
+
+            glUniformMatrix4fv(glGetUniformLocation(shader_program, "model"), 1, GL_FALSE, (float*)model);
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
 

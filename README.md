@@ -8,7 +8,7 @@
 	- [x] [Shaders](https://learnopengl.com/Getting-started/Shaders)
 	- [x] [Textures](https://learnopengl.com/Getting-started/Textures)
 	- [x] [Transformations](https://learnopengl.com/Getting-started/Transformations)
-	- [ ] [Coordinate Systems](https://learnopengl.com/Getting-started/Coordinate-Systems)
+	- [x] [Coordinate Systems](https://learnopengl.com/Getting-started/Coordinate-Systems)
 	- [ ] [Camera](https://learnopengl.com/Getting-started/Camera)
 	- [ ] [Review](https://learnopengl.com/Getting-started/Review)
 - [ ] Lighting
