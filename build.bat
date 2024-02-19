@@ -27,7 +27,8 @@ pushd bin
     rem call cl "..\part1\4_textures\4_textures.c" "..\glad.c" %CLFLAGS% /link %LDFLAGS%
     rem call cl "..\part1\5_transformations\5_transformations.c" "..\glad.c" %CLFLAGS% /link %LDFLAGS%
     rem call cl "..\part1\6_coordinate_systems\6_coordinate_systems.c" "..\glad.c" %CLFLAGS% /link %LDFLAGS%
-    call cl "..\part1\6_coordinate_systems\6_cube.c" "..\glad.c" %CLFLAGS% /link %LDFLAGS%
+    rem call cl "..\part1\6_coordinate_systems\6_cube.c" "..\glad.c" %CLFLAGS% /link %LDFLAGS%
+    call cl "..\part1\7_camera\7_camera.c" "..\glad.c" %CLFLAGS% /link %LDFLAGS%
 popd
 
 rem if %ERRORLEVEL% == 0 bin\1_window.exe
@@ -37,5 +38,6 @@ rem if %ERRORLEVEL% == 0 bin\3_shaders.exe
 rem if %ERRORLEVEL% == 0 bin\4_textures.exe
 rem if %ERRORLEVEL% == 0 bin\5_transformations.exe
 rem if %ERRORLEVEL% == 0 bin\6_coordinate_systems.exe
-if %ERRORLEVEL% == 0 bin\6_cube.exe
+rem if %ERRORLEVEL% == 0 bin\6_cube.exe
+if %ERRORLEVEL% == 0 bin\7_camera.exe
 echo Errorlevel: %ERRORLEVEL%
