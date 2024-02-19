@@ -63,12 +63,12 @@ GLuint glsl_load(char *vs_path, char *fs_path) {
     GLuint vertex, fragment;
 
     vertex = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertex, 1, &vs_contents, NULL);
+    glShaderSource(vertex, 1, (const char **)&vs_contents, NULL);
     glCompileShader(vertex);
     glsl_loader_check_compile_errors(vertex, "Vertex");
 
     fragment = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragment, 1, &fs_contents, NULL);
+    glShaderSource(fragment, 1, (const char **)&fs_contents, NULL);
     glCompileShader(fragment);
     glsl_loader_check_compile_errors(fragment, "Fragment");
 
